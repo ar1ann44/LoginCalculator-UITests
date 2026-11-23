@@ -32,13 +32,11 @@ final class LoginCalculatorUiTest: XCTestCase {
 
         // type a good username
         let usernameField = app.textFields["usernameField"]
-        usernameField.tap()
-        usernameField.typeText("admin")
+        typeInField(usernameField, "admin")
 
         // type a password with only 2 characters
         let passwordField = app.secureTextFields["passwordField"]
-        passwordField.tap()
-        passwordField.typeText("12")
+        typeInField(passwordField, "12")
 
         // the button needs 3 or more characters in both fields
         XCTAssertFalse(app.buttons["loginButton"].isEnabled, "Login button should be disabled with a short password")
@@ -49,11 +47,9 @@ final class LoginCalculatorUiTest: XCTestCase {
     func test02_wrongPasswordDoesNotShowCalculatorButton() throws {
 
         // correct username but wrong password
-        app.textFields["usernameField"].tap()
-        app.textFields["usernameField"].typeText("admin")
+        typeInField(app.textFields["usernameField"], "admin")
 
-        app.secureTextFields["passwordField"].tap()
-        app.secureTextFields["passwordField"].typeText("hello123")
+        typeInField(app.secureTextFields["passwordField"], "hello123")
 
         app.buttons["loginButton"].tap()
 
@@ -89,11 +85,9 @@ final class LoginCalculatorUiTest: XCTestCase {
         loginAndGoToCalculator()
 
         // 7 / 2 = 3.5
-        app.textFields["firstNumberField"].tap()
-        app.textFields["firstNumberField"].typeText("7")
+        typeInField(app.textFields["firstNumberField"], "7")
 
-        app.textFields["secondNumberField"].tap()
-        app.textFields["secondNumberField"].typeText("2")
+        typeInField(app.textFields["secondNumberField"], "2")
 
         app.buttons["divideButton"].tap()
 
@@ -110,8 +104,7 @@ final class LoginCalculatorUiTest: XCTestCase {
         loginAndGoToCalculator()
 
         // only the first number, the second one stays empty
-        app.textFields["firstNumberField"].tap()
-        app.textFields["firstNumberField"].typeText("5")
+        typeInField(app.textFields["firstNumberField"], "5")
 
         app.buttons["multiplyButton"].tap()
 
@@ -122,14 +115,28 @@ final class LoginCalculatorUiTest: XCTestCase {
     }
 
 
+    //MARK: - Helper - tap a field, wait for the keyboard focus and type
+    private func typeInField(_ field: XCUIElement, _ text: String) {
+
+        XCTAssertTrue(field.waitForExistence(timeout: 3), "Field should exist")
+
+        // sometimes the screen is still moving, so we tap again until the field has the focus
+        var tries = 0
+        while (field.value(forKey: "hasKeyboardFocus") as? Bool) != true && tries < 5 {
+            field.tap()
+            sleep(1)
+            tries += 1
+        }
+
+        field.typeText(text)
+    }
+
     //MARK: - Helper - login with the correct user and open the calculator
     private func loginAndGoToCalculator() {
 
-        app.textFields["usernameField"].tap()
-        app.textFields["usernameField"].typeText("admin")
+        typeInField(app.textFields["usernameField"], "admin")
 
-        app.secureTextFields["passwordField"].tap()
-        app.secureTextFields["passwordField"].typeText("secret123")
+        typeInField(app.secureTextFields["passwordField"], "secret123")
 
         app.buttons["loginButton"].tap()
 
