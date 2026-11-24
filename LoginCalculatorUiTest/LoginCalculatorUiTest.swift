@@ -70,11 +70,18 @@ final class LoginCalculatorUiTest: XCTestCase {
         loginAndGoToCalculator()
         XCTAssertTrue(app.staticTexts["Simple Calculator"].exists, "Calculator screen should be visible")
 
-        // press the back button of the navigation bar
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        // press the back button of the calculator navigation bar
+        let backButton = app.navigationBars["Calculator"].buttons.element(boundBy: 0)
+        XCTAssertTrue(backButton.waitForExistence(timeout: 3), "Back button should exist")
+        backButton.tap()
+
+        // if the screen was still moving the first tap can be lost, so we tap one more time
+        if app.buttons["loginButton"].waitForExistence(timeout: 3) == false {
+            backButton.tap()
+        }
 
         // we are in the login screen again and the welcome message is still there
-        XCTAssertTrue(app.buttons["loginButton"].waitForExistence(timeout: 3), "Login screen should appear again")
+        XCTAssertTrue(app.buttons["loginButton"].waitForExistence(timeout: 5), "Login screen should appear again")
         XCTAssertTrue(app.staticTexts["resultLabel"].label.contains("Welcome"))
     }
 
